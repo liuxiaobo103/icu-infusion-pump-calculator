@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f2f3f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#05070a" media="(prefers-color-scheme: dark)" />
+    <title>ICU 输液泵计算器</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div class="header-main">
+          <span class="app-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3v18" /><path d="M3 12h18" /></svg>
+          </span>
+          <div>
+            <p class="eyebrow">ICU Pump Calculator</p>
+            <h1>输液泵计算器</h1>
+          </div>
+        </div>
+        <button class="icon-button" id="resetButton" type="button" aria-label="恢复默认" title="恢复默认">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
+        </button>
+      </header>
+
+      <section class="mode-card">
+        <div class="mode-switch" role="tablist" aria-label="计算模式">
+          <button class="mode-button active" type="button" data-mode="doseToRate" role="tab" aria-selected="true">剂量算泵速</button>
+          <button class="mode-button" type="button" data-mode="rateToDose" role="tab" aria-selected="false">泵速算剂量</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <div class="title-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v7.3L4.7 18A2.7 2.7 0 0 0 7 22h10a2.7 2.7 0 0 0 2.3-4L14 9.3V2" /><path d="M8 2h8" /><path d="M7 16h10" /></svg>
+            <h2>药物及配置</h2>
+          </div>
+          <span class="save-pill">自动保存</span>
+        </div>
+
+        <div class="input-group">
+          <label for="drugSelect">药物模板</label>
+          <select id="drugSelect"></select>
+        </div>
+
+        <div class="two-col">
+          <div class="input-group">
+            <label for="amountInput">药物总量</label>
+            <input id="amountInput" type="number" min="0" step="any" inputmode="decimal" placeholder="如 4" />
+          </div>
+          <div class="input-group">
+            <label for="amountUnitSelect">单位</label>
+            <select id="amountUnitSelect">
+              <option value="mg">mg</option>
+              <option value="ug">μg</option>
+              <option value="U">U</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="volumeInput">配成总体积 (ml)</label>
+          <input id="volumeInput" type="number" min="0" step="any" inputmode="decimal" placeholder="如 50" />
+        </div>
+
+        <div class="concentration-row">
+          <span>当前浓度</span>
+          <strong id="concentrationText">--</strong>
+        </div>
+
+        <div class="action-row">
+          <button class="secondary-action" id="addDrugButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+            新建药物
+          </button>
+          <button class="danger-action hidden" id="deleteDrugButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M6 6l1 15h10l1-15" /></svg>
+            删除
+          </button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <div class="title-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0" /><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
+            <h2>患者体重</h2>
+          </div>
+          <span class="unit-hint">kg</span>
+        </div>
+        <div class="input-group no-margin">
+          <label for="weightInput">患者体重 (kg)</label>
+          <input id="weightInput" type="number" min="0" step="any" inputmode="decimal" placeholder="输入体重" />
+        </div>
+        <p class="field-note" id="weightNote">当前剂量单位需要体重参与计算。</p>
+      </section>
+
+      <section class="card">
+        <div class="card-title">
+          <div class="title-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16" /><path d="M7 16V9" /><path d="M12 16V5" /><path d="M17 16v-4" /></svg>
+            <h2>目标剂量</h2>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="doseUnitSelect">目标剂量单位</label>
+          <select id="doseUnitSelect">
+            <option value="ug/kg/min">μg/kg/min</option>
+            <option value="ug/kg/h">μg/kg/h</option>
+            <option value="mg/kg/h">mg/kg/h</option>
+            <option value="U/h">U/h</option>
+            <option value="ug/min">μg/min</option>
+            <option value="mg/h">mg/h</option>
+          </select>
+        </div>
+
+        <div class="input-group" id="targetDoseField">
+          <label for="targetDoseInput" id="targetDoseLabel">目标剂量</label>
+          <input id="targetDoseInput" type="number" min="0" step="any" inputmode="decimal" placeholder="输入目标剂量" />
+        </div>
+
+        <div class="input-group hidden" id="pumpRateField">
+          <label for="pumpRateInput">当前泵速 (ml/h)</label>
+          <input id="pumpRateInput" type="number" min="0" step="any" inputmode="decimal" placeholder="输入当前泵速" />
+        </div>
+      </section>
+
+      <section class="result-card" aria-live="polite">
+        <div class="result-heading">
+          <span id="resultLabel">计算泵速</span>
+          <strong id="resultUnit">ml/h</strong>
+        </div>
+        <div class="result-value" id="resultValue">--</div>
+        <div class="formula-box">
+          <div class="formula-title">计算过程复核</div>
+          <ol id="processList" class="process-list">
+            <li>请输入数据后自动显示。</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="message-list" id="messageList" aria-live="polite"></section>
+
+      <section class="card">
+        <div class="card-title">
+          <div class="title-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17h.01" /><path d="M12 13v-2" /><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z" /></svg>
+            <h2>药物提示</h2>
+          </div>
+        </div>
+        <div class="info-grid">
+          <article><span>主要用途</span><p id="usageText">--</p></article>
+          <article><span>注意事项</span><p id="cautionText">--</p></article>
+          <article><span>极量 / 参考上限</span><p id="limitText">--</p></article>
+        </div>
+      </section>
+
+      <footer class="disclaimer">
+        <strong>免责声明：</strong>本工具仅用于医务人员进行输液泵速度换算辅助，计算结果需结合药品说明书、医院规范、医嘱制度和临床判断复核，不替代临床决策。
+        所有配置和输入仅保存在本机浏览器 localStorage，不上传服务器。
+      </footer>
+    </main>
+
+    <dialog class="drug-dialog" id="drugDialog">
+      <form method="dialog" class="dialog-card" id="drugDialogForm">
+        <div class="card-title">
+          <div class="title-left">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+            <h2>新建药物</h2>
+          </div>
+          <button class="icon-button small" value="cancel" type="submit" aria-label="关闭">×</button>
+        </div>
+
+        <div class="input-group">
+          <label for="newDrugNameInput">药物名称</label>
+          <input id="newDrugNameInput" type="text" maxlength="24" placeholder="例如 垂体后叶素" />
+        </div>
+
+        <div class="input-group">
+          <label for="newDrugDoseUnitSelect">默认剂量单位</label>
+          <select id="newDrugDoseUnitSelect">
+            <option value="ug/kg/min">μg/kg/min</option>
+            <option value="ug/kg/h">μg/kg/h</option>
+            <option value="mg/kg/h">mg/kg/h</option>
+            <option value="U/h">U/h</option>
+            <option value="ug/min">μg/min</option>
+            <option value="mg/h">mg/h</option>
+          </select>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="secondary-button" value="cancel" type="submit">取消</button>
+          <button class="primary-button" id="confirmAddDrugButton" type="button">创建</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
